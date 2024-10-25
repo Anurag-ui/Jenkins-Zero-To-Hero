@@ -63,8 +63,8 @@ pipeline {
     
     post {
         always {
-            // Run cleanup steps on any available node
-            node {
+            // Run cleanup steps on a node with label 'any' (default Jenkins label)
+            node('any') {
                 script {
                     // Cleanup Docker container after tests
                     sh 'docker stop mongodb || true'
