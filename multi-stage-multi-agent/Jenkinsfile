@@ -43,26 +43,16 @@ pipeline {
                     // Connect to MongoDB and run sample queries
                     sh '''
                     docker exec mongodb mongo --eval "
-                        // 1. Insert Sample Data
                         db.exampleCollection.insertMany([
                             { name: 'Alice', age: 25, city: 'New York' },
                             { name: 'Bob', age: 30, city: 'San Francisco' },
                             { name: 'Charlie', age: 35, city: 'Chicago' }
                         ]);
 
-                        // 2. Query to Find All Documents
                         db.exampleCollection.find().pretty();
-
-                        // 3. Query to Find Specific Document
                         db.exampleCollection.find({ name: 'Alice' }).pretty();
-
-                        // 4. Update a Document
                         db.exampleCollection.updateOne({ name: 'Alice' }, { $set: { city: 'Los Angeles' } });
-
-                        // 5. Delete a Document
                         db.exampleCollection.deleteOne({ name: 'Bob' });
-
-                        // 6. Count Documents
                         db.exampleCollection.countDocuments();
                     "
                     '''
@@ -73,8 +63,8 @@ pipeline {
     
     post {
         always {
-            agent docker
-            steps {
+            // Run cleanup steps on any available node
+            node {
                 script {
                     // Cleanup Docker container after tests
                     sh 'docker stop mongodb || true'
