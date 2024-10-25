@@ -73,7 +73,7 @@ pipeline {
     
     post {
         always {
-            agent any
+            agent docker
             steps {
                 script {
                     // Cleanup Docker container after tests
