@@ -68,9 +68,9 @@ pipeline {
                 // Cleanup Docker container after tests
                 sh 'docker stop mongodb'
                 sh 'docker rm mongodb'
-            }
-        }
+               }
+          }
     }
 }
-  }
+}
 }
