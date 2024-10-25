@@ -17,5 +17,60 @@ pipeline {
         sh 'node --version'
       }
     }
+    stage('Setup MongoDB in Docker') {
+            steps {
+                script {
+                    sh 'docker pull mongo:latest'
+                    sh 'docker run -d --name mongodb -p 27017:27017 mongo'
+                }
+            }
+        }
+
+     stage('Run MongoDB Queries') {
+            steps {
+                script {
+                    // Wait for MongoDB to initialize
+                    sleep(10)
+
+                    // Connect to MongoDB and run sample queries
+                    sh '''
+                    docker exec mongodb mongo --eval "
+                        // 1. Insert Sample Data
+                        db.exampleCollection.insertMany([
+                            { name: 'Alice', age: 25, city: 'New York' },
+                            { name: 'Bob', age: 30, city: 'San Francisco' },
+                            { name: 'Charlie', age: 35, city: 'Chicago' }
+                        ]);
+
+                        // 2. Query to Find All Documents
+                        db.exampleCollection.find().pretty();
+
+                        // 3. Query to Find Specific Document
+                        db.exampleCollection.find({ name: 'Alice' }).pretty();
+
+                        // 4. Update a Document
+                        db.exampleCollection.updateOne({ name: 'Alice' }, { $set: { city: 'Los Angeles' } });
+
+                        // 5. Delete a Document
+                        db.exampleCollection.deleteOne({ name: 'Bob' });
+
+                        // 6. Count Documents
+                        db.exampleCollection.countDocuments();
+                    "
+                    '''
+                }
+            }
+        }
+    }
+    post {
+        always {
+            script {
+                // Cleanup Docker container after tests
+                sh 'docker stop mongodb'
+                sh 'docker rm mongodb'
+            }
+        }
+    }
+}
   }
 }
