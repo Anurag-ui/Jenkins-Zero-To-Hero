@@ -1,23 +1,25 @@
 pipeline {
-  agent none
-  stages {
-    stage('Back-end') {
-      agent {
-        docker { image 'maven:3.8.1-adoptopenjdk-11' }
-      }
-      steps {
-        sh 'mvn --version'
-      }
-    }
-    stage('Front-end') {
-      agent {
-        docker { image 'node:16-alpine' }
-      }
-      steps {
-        sh 'node --version'
-      }
-    }
-    stage('Setup MongoDB in Docker') {
+    agent none
+    stages {
+        stage('Back-end') {
+            agent {
+                docker { image 'maven:3.8.1-adoptopenjdk-11' }
+            }
+            steps {
+                sh 'mvn --version'
+            }
+        }
+        
+        stage('Front-end') {
+            agent {
+                docker { image 'node:16-alpine' }
+            }
+            steps {
+                sh 'node --version'
+            }
+        }
+        
+        stage('Setup MongoDB in Docker') {
             steps {
                 script {
                     sh 'docker pull mongo:latest'
@@ -25,8 +27,8 @@ pipeline {
                 }
             }
         }
-
-     stage('Run MongoDB Queries') {
+        
+        stage('Run MongoDB Queries') {
             steps {
                 script {
                     // Wait for MongoDB to initialize
@@ -62,15 +64,14 @@ pipeline {
             }
         }
     }
+    
     post {
         always {
             script {
                 // Cleanup Docker container after tests
                 sh 'docker stop mongodb'
                 sh 'docker rm mongodb'
-               }
-          }
+            }
+        }
     }
-}
-}
 }
