@@ -1,76 +1,21 @@
 pipeline {
-    agent none
-    stages {
-        stage('Back-end') {
-            agent {
-                docker { image 'maven:3.8.1-adoptopenjdk-11' }
-            }
-            steps {
-                sh 'mvn --version'
-            }
-        }
-        
-        stage('Front-end') {
-            agent {
-                docker { image 'node:16-alpine' }
-            }
-            steps {
-                sh 'node --version'
-            }
-        }
-        
-        stage('Setup MongoDB in Docker') {
-            agent {
-                docker { image 'mongo:latest' }
-            }
-            steps {
-                script {
-                    sh 'docker pull mongo:latest'
-                    sh 'docker run -d --name mongodb -p 27017:27017 mongo'
-                }
-            }
-        }
-        
-        stage('Run MongoDB Queries') {
-            agent {
-                docker { image 'mongo:latest' }
-            }
-            steps {
-                script {
-                    // Wait for MongoDB to initialize
-                    sleep(10)
-
-                    // Connect to MongoDB and run sample queries
-                    sh '''
-                    docker exec mongodb mongo --eval "
-                        db.exampleCollection.insertMany([
-                            { name: 'Alice', age: 25, city: 'New York' },
-                            { name: 'Bob', age: 30, city: 'San Francisco' },
-                            { name: 'Charlie', age: 35, city: 'Chicago' }
-                        ]);
-
-                        db.exampleCollection.find().pretty();
-                        db.exampleCollection.find({ name: 'Alice' }).pretty();
-                        db.exampleCollection.updateOne({ name: 'Alice' }, { $set: { city: 'Los Angeles' } });
-                        db.exampleCollection.deleteOne({ name: 'Bob' });
-                        db.exampleCollection.countDocuments();
-                    "
-                    '''
-                }
-            }
-        }
+  agent none
+  stages {
+    stage('Back-end') {
+      agent {
+        docker { image 'maven:3.8.1-adoptopenjdk-11' }
+      }
+      steps {
+        sh 'mvn --version'
+      }
     }
-    
-    post {
-        always {
-            // Run cleanup steps on a node with label 'any' (default Jenkins label)
-            node('any') {
-                script {
-                    // Cleanup Docker container after tests
-                    sh 'docker stop mongodb || true'
-                    sh 'docker rm mongodb || true'
-                }
-            }
-        }
+    stage('Front-end') {
+      agent {
+        docker { image 'node:16-alpine' }
+      }
+      steps {
+        sh 'node --version'
+      }
     }
+  }
 }
