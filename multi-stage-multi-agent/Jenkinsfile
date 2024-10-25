@@ -20,6 +20,9 @@ pipeline {
         }
         
         stage('Setup MongoDB in Docker') {
+            agent {
+                docker { image 'mongo:latest' }
+            }
             steps {
                 script {
                     sh 'docker pull mongo:latest'
@@ -29,6 +32,9 @@ pipeline {
         }
         
         stage('Run MongoDB Queries') {
+            agent {
+                docker { image 'mongo:latest' }
+            }
             steps {
                 script {
                     // Wait for MongoDB to initialize
@@ -67,10 +73,13 @@ pipeline {
     
     post {
         always {
-            script {
-                // Cleanup Docker container after tests
-                sh 'docker stop mongodb'
-                sh 'docker rm mongodb'
+            agent any
+            steps {
+                script {
+                    // Cleanup Docker container after tests
+                    sh 'docker stop mongodb || true'
+                    sh 'docker rm mongodb || true'
+                }
             }
         }
     }
